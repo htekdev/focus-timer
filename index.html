@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Focus Timer</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #18181b;
+      --surface2: #27272a;
+      --border: #3f3f46;
+      --accent: #6366f1;
+      --accent-glow: rgba(99,102,241,0.35);
+      --accent-hover: #818cf8;
+      --danger: #ef4444;
+      --text: #f4f4f5;
+      --muted: #71717a;
+      --radius: 12px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 420px;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+    }
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .header p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Interval selector */
+    .interval-section {
+      width: 100%;
+    }
+    .interval-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+    .presets {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .preset-btn {
+      flex: 1;
+      min-width: 56px;
+      padding: 10px 4px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      text-align: center;
+    }
+    .preset-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent-hover);
+    }
+    .preset-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .custom-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .custom-row label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .custom-input {
+      flex: 1;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color 0.15s;
+      width: 100%;
+    }
+    .custom-input:focus {
+      border-color: var(--accent);
+    }
+    .custom-input::-webkit-inner-spin-button,
+    .custom-input::-webkit-outer-spin-button { opacity: 0.5; }
+
+    /* Clock face */
+    .clock-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .clock-svg {
+      transform: rotate(-90deg);
+    }
+    .clock-track {
+      fill: none;
+      stroke: var(--surface2);
+      stroke-width: 8;
+    }
+    .clock-progress {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 8;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.25s linear, stroke 0.3s;
+    }
+    .clock-display {
+      position: absolute;
+      text-align: center;
+    }
+    .clock-time {
+      font-size: 2.8rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .clock-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 4px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* Pulse ring — shown on beep */
+    .pulse-ring {
+      position: absolute;
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      border: 3px solid var(--accent);
+      opacity: 0;
+      pointer-events: none;
+      animation: none;
+    }
+    .pulse-ring.beeping {
+      animation: pulse-out 0.7s ease-out forwards;
+    }
+    @keyframes pulse-out {
+      0%   { transform: scale(0.85); opacity: 0.8; }
+      100% { transform: scale(1.4);  opacity: 0; }
+    }
+
+    /* Beep count badge */
+    .beep-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .beep-badge.visible { opacity: 1; }
+
+    /* Controls */
+    .controls {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .btn-start, .btn-stop {
+      width: 100%;
+      padding: 18px;
+      border-radius: var(--radius);
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.1s, box-shadow 0.15s, background 0.15s;
+    }
+    .btn-start {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 24px var(--accent-glow);
+    }
+    .btn-start:hover:not(:disabled) {
+      background: var(--accent-hover);
+      box-shadow: 0 0 36px var(--accent-glow);
+    }
+    .btn-start:active:not(:disabled) { transform: scale(0.97); }
+    .btn-start:disabled {
+      opacity: 0.45;
+      cursor: default;
+      box-shadow: none;
+    }
+    .btn-stop {
+      background: var(--surface);
+      color: var(--danger);
+      border: 1.5px solid var(--danger);
+    }
+    .btn-stop:hover {
+      background: rgba(239,68,68,0.1);
+    }
+    .btn-stop:active { transform: scale(0.97); }
+
+    /* Status bar */
+    .status {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+      min-height: 18px;
+      letter-spacing: 0.02em;
+    }
+    .status.active { color: var(--accent-hover); }
+    .status.beeping-text { color: #fbbf24; }
+
+    /* Volume */
+    .volume-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+    }
+    .volume-icon {
+      font-size: 1rem;
+      color: var(--muted);
+    }
+    input[type=range] {
+      flex: 1;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .volume-val {
+      font-size: 0.8rem;
+      color: var(--muted);
+      min-width: 28px;
+      text-align: right;
+    }
+
+    @media (max-width: 480px) {
+      .app { padding: 24px 16px; gap: 24px; }
+      .clock-time { font-size: 2.3rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <h1>🎯 Focus Timer</h1>
+    <p>Periodic beeps to keep you on task</p>
+  </div>
+
+  <!-- Interval picker -->
+  <div class="interval-section">
+    <div class="interval-label">Beep every</div>
+    <div class="presets" id="presets">
+      <button class="preset-btn" data-seconds="20">20s</button>
+      <button class="preset-btn active" data-seconds="30">30s</button>
+      <button class="preset-btn" data-seconds="60">1m</button>
+      <button class="preset-btn" data-seconds="120">2m</button>
+      <button class="preset-btn" data-seconds="300">5m</button>
+    </div>
+    <div class="custom-row">
+      <label for="customInput">Custom (sec):</label>
+      <input id="customInput" class="custom-input" type="number" min="3" max="3600" placeholder="e.g. 45" />
+    </div>
+  </div>
+
+  <!-- Clock -->
+  <div class="clock-wrap">
+    <div class="pulse-ring" id="pulseRing"></div>
+    <svg class="clock-svg" width="180" height="180" viewBox="0 0 180 180">
+      <circle class="clock-track" cx="90" cy="90" r="80" />
+      <circle class="clock-progress" id="clockProgress" cx="90" cy="90" r="80"
+              stroke-dasharray="502.65" stroke-dashoffset="0" />
+    </svg>
+    <div class="clock-display">
+      <div class="clock-time" id="clockTime">0:30</div>
+      <div class="clock-label" id="clockLabel">ready</div>
+    </div>
+    <div class="beep-badge" id="beepBadge">0 beeps</div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="btn-start" id="btnStart">▶ START</button>
+    <button class="btn-stop" id="btnStop" style="display:none">■ STOP</button>
+  </div>
+
+  <!-- Status -->
+  <div class="status" id="status">Pick an interval and hit START</div>
+
+  <!-- Volume -->
+  <div class="volume-row">
+    <span class="volume-icon">🔔</span>
+    <input type="range" id="volumeSlider" min="0" max="100" value="70" />
+    <span class="volume-val" id="volumeVal">70%</span>
+  </div>
+
+</div>
+
+<script>
+  // ── State ──────────────────────────────────────────────────────────────────
+  let intervalSeconds = 30;
+  let running = false;
+  let tickTimer = null;
+  let elapsed = 0;
+  let beepCount = 0;
+  let audioCtx = null;
+  let volume = 0.7;
+
+  const CIRCUMFERENCE = 2 * Math.PI * 80; // ~502.65
+
+  // ── DOM refs ───────────────────────────────────────────────────────────────
+  const clockTime     = document.getElementById('clockTime');
+  const clockLabel    = document.getElementById('clockLabel');
+  const clockProgress = document.getElementById('clockProgress');
+  const pulseRing     = document.getElementById('pulseRing');
+  const beepBadge     = document.getElementById('beepBadge');
+  const btnStart      = document.getElementById('btnStart');
+  const btnStop       = document.getElementById('btnStop');
+  const statusEl      = document.getElementById('status');
+  const volumeSlider  = document.getElementById('volumeSlider');
+  const volumeVal     = document.getElementById('volumeVal');
+  const customInput   = document.getElementById('customInput');
+  const presets       = document.querySelectorAll('.preset-btn');
+
+  // ── Interval selection ─────────────────────────────────────────────────────
+  presets.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (running) return;
+      presets.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      customInput.value = '';
+      intervalSeconds = parseInt(btn.dataset.seconds);
+      resetDisplay();
+    });
+  });
+
+  customInput.addEventListener('input', () => {
+    const val = parseInt(customInput.value);
+    if (!isNaN(val) && val >= 3) {
+      presets.forEach(b => b.classList.remove('active'));
+      intervalSeconds = val;
+      if (!running) resetDisplay();
+    }
+  });
+
+  // ── Volume ─────────────────────────────────────────────────────────────────
+  volumeSlider.addEventListener('input', () => {
+    volume = volumeSlider.value / 100;
+    volumeVal.textContent = volumeSlider.value + '%';
+  });
+
+  // ── Web Audio beep ─────────────────────────────────────────────────────────
+  function getAudioCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+  }
+
+  function playBeep() {
+    const ctx = getAudioCtx();
+    if (ctx.state === 'suspended') ctx.resume();
+
+    const now = ctx.currentTime;
+    const gain = ctx.createGain();
+    gain.connect(ctx.destination);
+
+    // Double-tone chime: 880 Hz then 1100 Hz
+    const tones = [
+      { freq: 880,  start: now,       dur: 0.18 },
+      { freq: 1100, start: now + 0.2, dur: 0.18 },
+    ];
+
+    tones.forEach(({ freq, start, dur }) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+
+      const tGain = ctx.createGain();
+      tGain.gain.setValueAtTime(0, start);
+      tGain.gain.linearRampToValueAtTime(volume * 0.6, start + 0.02);
+      tGain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+
+      osc.connect(tGain);
+      tGain.connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + dur + 0.05);
+    });
+  }
+
+  // ── Display helpers ────────────────────────────────────────────────────────
+  function formatTime(sec) {
+    if (sec < 60) return '0:' + String(sec).padStart(2, '0');
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return m + ':' + String(s).padStart(2, '0');
+  }
+
+  function updateClock(remaining) {
+    clockTime.textContent = formatTime(remaining);
+    const frac = remaining / intervalSeconds;
+    const offset = CIRCUMFERENCE * (1 - frac);
+    clockProgress.style.strokeDashoffset = offset;
+  }
+
+  function resetDisplay() {
+    updateClock(intervalSeconds);
+    clockLabel.textContent = 'ready';
+    clockTime.style.color = '';
+    clockProgress.style.stroke = 'var(--accent)';
+    beepBadge.classList.remove('visible');
+    statusEl.textContent = 'Pick an interval and hit START';
+    statusEl.className = 'status';
+  }
+
+  function triggerBeepVisuals() {
+    // Flash clock red briefly
+    clockTime.style.color = '#f87171';
+    clockProgress.style.stroke = '#f87171';
+    setTimeout(() => {
+      clockTime.style.color = '';
+      clockProgress.style.stroke = 'var(--accent)';
+    }, 400);
+
+    // Pulse ring
+    pulseRing.classList.remove('beeping');
+    void pulseRing.offsetWidth; // reflow
+    pulseRing.classList.add('beeping');
+
+    // Badge
+    beepCount++;
+    beepBadge.textContent = beepCount + (beepCount === 1 ? ' beep' : ' beeps');
+    beepBadge.classList.add('visible');
+
+    // Status flash
+    statusEl.textContent = '🔔 Beep #' + beepCount + ' — refocus!';
+    statusEl.className = 'status beeping-text';
+    setTimeout(() => {
+      if (running) {
+        statusEl.textContent = 'Next beep in ' + formatTime(intervalSeconds) + '…';
+        statusEl.className = 'status active';
+      }
+    }, 1500);
+  }
+
+  // ── Timer core ─────────────────────────────────────────────────────────────
+  function tick() {
+    elapsed++;
+    const remaining = intervalSeconds - (elapsed % intervalSeconds);
+    updateClock(remaining === intervalSeconds ? intervalSeconds : remaining);
+    clockLabel.textContent = 'counting';
+
+    if (elapsed % intervalSeconds === 0) {
+      playBeep();
+      triggerBeepVisuals();
+    }
+  }
+
+  function startTimer() {
+    if (running) return;
+    const customVal = parseInt(customInput.value);
+    if (!isNaN(customVal) && customVal >= 3) intervalSeconds = customVal;
+    if (intervalSeconds < 3) { alert('Please set an interval of at least 3 seconds.'); return; }
+
+    running = true;
+    elapsed = 0;
+    beepCount = 0;
+    beepBadge.classList.remove('visible');
+
+    btnStart.style.display = 'none';
+    btnStop.style.display = 'block';
+    customInput.disabled = true;
+    presets.forEach(b => b.disabled = true);
+
+    updateClock(intervalSeconds);
+    clockLabel.textContent = 'counting';
+    statusEl.textContent = 'Next beep in ' + formatTime(intervalSeconds) + '…';
+    statusEl.className = 'status active';
+
+    // Prime AudioContext on user gesture
+    getAudioCtx();
+
+    tickTimer = setInterval(tick, 1000);
+  }
+
+  function stopTimer() {
+    if (!running) return;
+    running = false;
+    clearInterval(tickTimer);
+    tickTimer = null;
+    elapsed = 0;
+
+    btnStart.style.display = 'block';
+    btnStop.style.display = 'none';
+    customInput.disabled = false;
+    presets.forEach(b => b.disabled = false);
+
+    clockLabel.textContent = 'stopped';
+    clockProgress.style.stroke = 'var(--accent)';
+    clockTime.style.color = '';
+    updateClock(intervalSeconds);
+
+    const summary = beepCount > 0
+      ? `Stopped after ${beepCount} beep${beepCount === 1 ? '' : 's'}`
+      : 'Stopped';
+    statusEl.textContent = summary;
+    statusEl.className = 'status';
+  }
+
+  btnStart.addEventListener('click', startTimer);
+  btnStop.addEventListener('click', stopTimer);
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  resetDisplay();
+</script>
+</body>
+</html>
