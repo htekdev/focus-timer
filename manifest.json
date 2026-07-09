@@ -1,0 +1,19 @@
+{
+  "name": "Focus Timer",
+  "short_name": "Focus",
+  "description": "Periodic audio reminders to keep you on task",
+  "start_url": "/focus-timer/",
+  "display": "standalone",
+  "background_color": "#0d0d0f",
+  "theme_color": "#0d0d0f",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"]
+}
