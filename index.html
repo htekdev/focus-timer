@@ -14,341 +14,245 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0d0d0f;
-      --surface: #18181b;
-      --surface2: #27272a;
-      --border: #3f3f46;
-      --accent: #6366f1;
-      --accent-glow: rgba(99,102,241,0.35);
+      --bg:           #0d0d0f;
+      --surface:      #18181b;
+      --surface2:     #27272a;
+      --border:       #3f3f46;
+      --accent:       #6366f1;
+      --accent-glow:  rgba(99,102,241,0.35);
       --accent-hover: #818cf8;
-      --danger: #ef4444;
-      --text: #f4f4f5;
-      --muted: #71717a;
-      --radius: 12px;
+      --danger:       #ef4444;
+      --text:         #f4f4f5;
+      --muted:        #71717a;
+      --radius:       12px;
     }
 
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100dvh;
-    }
+    html, body { min-height: 100dvh; background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { display: flex; justify-content: center; padding: 20px 0 48px; }
 
-    .app {
-      width: 100%;
-      max-width: 420px;
-      padding: 32px 24px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 32px;
-    }
+    .app { width: 100%; max-width: 440px; padding: 0 18px; display: flex; flex-direction: column; gap: 16px; }
 
-    /* Header */
-    .header {
-      text-align: center;
-    }
-    .header h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--text);
-    }
-    .header p {
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-top: 4px;
-    }
+    /* ── Header ─────────────────── */
+    .header { text-align: center; padding-top: 4px; }
+    .header h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; }
+    .header p  { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
 
-    /* Interval selector */
-    .interval-section {
-      width: 100%;
+    /* ── Mode tabs ──────────────── */
+    .mode-tabs { display: flex; background: var(--surface); border-radius: 10px; padding: 3px; gap: 3px; }
+    .mode-tab {
+      flex: 1; padding: 9px; border: none; border-radius: 8px; background: transparent;
+      color: var(--muted); font-size: 0.85rem; font-weight: 600; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
     }
-    .interval-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 10px;
+    .mode-tab.active { background: var(--accent); color: #fff; }
+    .mode-tab:disabled { opacity: 0.4; cursor: default; }
+
+    /* ── Section card ───────────── */
+    .section {
+      background: var(--surface); border-radius: var(--radius); padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 11px;
     }
-    .presets {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
+    .section-label { font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+    /* ── Preset + custom ────────── */
+    .presets { display: flex; gap: 6px; flex-wrap: wrap; }
     .preset-btn {
-      flex: 1;
-      min-width: 56px;
-      padding: 10px 4px;
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: border-color 0.15s, background 0.15s, color 0.15s;
-      text-align: center;
+      flex: 1; min-width: 46px; padding: 8px 4px;
+      background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px;
+      color: var(--text); font-size: 0.83rem; font-weight: 600; cursor: pointer;
+      transition: border-color 0.15s, background 0.15s; text-align: center;
     }
-    .preset-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent-hover);
-    }
-    .preset-btn.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
+    .preset-btn:hover { border-color: var(--accent); }
+    .preset-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .preset-btn:disabled { opacity: 0.38; cursor: default; }
 
-    .custom-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .custom-row label {
-      font-size: 0.8rem;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-    .custom-input {
-      flex: 1;
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-size: 0.95rem;
-      font-weight: 600;
-      padding: 9px 12px;
-      outline: none;
+    .row { display: flex; align-items: center; gap: 8px; }
+    .row label, .row span { font-size: 0.76rem; color: var(--muted); white-space: nowrap; }
+    .field-input {
+      flex: 1; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px;
+      color: var(--text); font-size: 0.9rem; font-weight: 600; padding: 7px 10px; outline: none;
       transition: border-color 0.15s;
-      width: 100%;
     }
-    .custom-input:focus {
-      border-color: var(--accent);
-    }
-    .custom-input::-webkit-inner-spin-button,
-    .custom-input::-webkit-outer-spin-button { opacity: 0.5; }
+    .field-input:focus { border-color: var(--accent); }
+    .field-input::-webkit-inner-spin-button { opacity: 0.4; }
+    .field-input:disabled { opacity: 0.4; }
 
-    /* Clock face */
-    .clock-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .sprint-row { display: none; }
+    .sprint-row.visible { display: flex; }
+
+    /* ── Sound picker ───────────── */
+    .sound-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .sound-btn {
+      padding: 6px 11px; background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: 20px; color: var(--muted); font-size: 0.78rem; font-weight: 600;
+      cursor: pointer; transition: all 0.15s; white-space: nowrap;
     }
-    .clock-svg {
-      transform: rotate(-90deg);
+    .sound-btn:hover { border-color: var(--accent); color: var(--text); }
+    .sound-btn.active { background: rgba(99,102,241,0.18); border-color: var(--accent); color: var(--accent-hover); }
+
+    /* Toggle */
+    .toggle-row { display: flex; align-items: center; gap: 10px; }
+    .toggle-row span { font-size: 0.75rem; color: var(--muted); }
+    .toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0; background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: 20px; cursor: pointer; transition: background 0.2s, border-color 0.2s;
     }
-    .clock-track {
-      fill: none;
-      stroke: var(--surface2);
-      stroke-width: 8;
+    .toggle-slider::before {
+      content: ''; position: absolute; width: 13px; height: 13px; border-radius: 50%;
+      background: var(--muted); top: 2.5px; left: 2.5px;
+      transition: transform 0.2s, background 0.2s;
     }
+    .toggle input:checked + .toggle-slider { background: rgba(99,102,241,0.28); border-color: var(--accent); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(16px); background: var(--accent); }
+
+    /* ── Sprint Calculator ──────── */
+    .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .calc-field { display: flex; flex-direction: column; gap: 5px; }
+    .calc-field label { font-size: 0.72rem; color: var(--muted); }
+
+    .calc-result {
+      background: var(--surface2); border-radius: 8px; padding: 10px 12px;
+      font-size: 0.83rem; color: var(--text); line-height: 1.55; min-height: 44px;
+    }
+    .calc-result .hi { color: var(--accent-hover); font-weight: 700; }
+
+    .btn-calc-start {
+      width: 100%; padding: 11px; border-radius: 8px; border: none;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff;
+      font-size: 0.92rem; font-weight: 700; cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-calc-start:hover:not(:disabled) { opacity: 0.88; }
+    .btn-calc-start:active:not(:disabled) { transform: scale(0.98); }
+    .btn-calc-start:disabled { opacity: 0.38; cursor: default; }
+
+    /* ── Clock ──────────────────── */
+    .clock-wrap { position: relative; display: flex; align-items: center; justify-content: center; }
+    .clock-svg { transform: rotate(-90deg); }
+    .clock-track { fill: none; stroke: var(--surface2); stroke-width: 8; }
     .clock-progress {
-      fill: none;
-      stroke: var(--accent);
-      stroke-width: 8;
-      stroke-linecap: round;
+      fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round;
       transition: stroke-dashoffset 0.25s linear, stroke 0.3s;
     }
-    .clock-display {
-      position: absolute;
-      text-align: center;
-    }
+    .clock-display { position: absolute; text-align: center; }
+    .clock-sublabel { font-size: 0.62rem; color: var(--muted); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 1px; display: none; }
     .clock-time {
-      font-size: 2.8rem;
-      font-weight: 700;
-      letter-spacing: -0.04em;
-      font-variant-numeric: tabular-nums;
-      line-height: 1;
-      transition: color 0.2s;
+      font-size: 2.7rem; font-weight: 700; letter-spacing: -0.04em;
+      font-variant-numeric: tabular-nums; line-height: 1; transition: color 0.2s;
     }
-    .clock-label {
-      font-size: 0.75rem;
-      color: var(--muted);
-      margin-top: 4px;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
+    .sprint-remain { font-size: 0.72rem; font-weight: 600; color: var(--accent-hover); margin-top: 3px; display: none; }
+    .clock-label { font-size: 0.7rem; color: var(--muted); margin-top: 3px; letter-spacing: 0.05em; text-transform: uppercase; }
 
-    /* Pulse ring — shown on beep */
     .pulse-ring {
-      position: absolute;
-      width: 170px;
-      height: 170px;
-      border-radius: 50%;
-      border: 3px solid var(--accent);
-      opacity: 0;
-      pointer-events: none;
-      animation: none;
+      position: absolute; width: 174px; height: 174px; border-radius: 50%;
+      border: 3px solid var(--accent); opacity: 0; pointer-events: none;
     }
-    .pulse-ring.beeping {
-      animation: pulse-out 0.7s ease-out forwards;
-    }
+    .pulse-ring.beeping { animation: pulse-out 0.7s ease-out forwards; }
     @keyframes pulse-out {
-      0%   { transform: scale(0.85); opacity: 0.8; }
-      100% { transform: scale(1.4);  opacity: 0; }
+      0%   { transform: scale(0.85); opacity: 0.85; }
+      100% { transform: scale(1.45); opacity: 0; }
     }
-
-    /* Beep count badge */
     .beep-badge {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: var(--accent);
-      color: #fff;
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 20px;
-      opacity: 0;
-      transition: opacity 0.2s;
+      position: absolute; top: 7px; right: 7px;
+      background: var(--accent); color: #fff; font-size: 0.64rem; font-weight: 700;
+      padding: 2px 7px; border-radius: 20px; opacity: 0; transition: opacity 0.2s;
     }
     .beep-badge.visible { opacity: 1; }
 
-    /* Controls */
-    .controls {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+    /* ── Progress ───────────────── */
+    .progress-section { display: flex; flex-direction: column; gap: 7px; }
+    .progress-bar-wrap { height: 7px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+    .progress-bar-fill {
+      height: 100%; background: linear-gradient(90deg, var(--accent), #8b5cf6);
+      border-radius: 4px; width: 0%; transition: width 0.6s ease;
     }
+    .progress-stats { display: flex; justify-content: space-between; font-size: 0.73rem; color: var(--muted); }
+    .progress-stats .stat-done { color: var(--accent-hover); font-weight: 600; }
+
+    /* ── Controls ───────────────── */
+    .controls { display: flex; flex-direction: column; gap: 10px; }
     .btn-start, .btn-stop {
-      width: 100%;
-      padding: 18px;
-      border-radius: var(--radius);
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      cursor: pointer;
-      border: none;
+      width: 100%; padding: 17px; border-radius: var(--radius); font-size: 1.05rem;
+      font-weight: 700; letter-spacing: 0.02em; cursor: pointer; border: none;
       transition: transform 0.1s, box-shadow 0.15s, background 0.15s;
     }
-    .btn-start {
-      background: var(--accent);
-      color: #fff;
-      box-shadow: 0 0 24px var(--accent-glow);
-    }
-    .btn-start:hover:not(:disabled) {
-      background: var(--accent-hover);
-      box-shadow: 0 0 36px var(--accent-glow);
-    }
+    .btn-start { background: var(--accent); color: #fff; box-shadow: 0 0 24px var(--accent-glow); }
+    .btn-start:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 0 36px var(--accent-glow); }
     .btn-start:active:not(:disabled) { transform: scale(0.97); }
-    .btn-start:disabled {
-      opacity: 0.45;
-      cursor: default;
-      box-shadow: none;
-    }
-    .btn-stop {
-      background: var(--surface);
-      color: var(--danger);
-      border: 1.5px solid var(--danger);
-    }
-    .btn-stop:hover {
-      background: rgba(239,68,68,0.1);
-    }
+    .btn-start:disabled { opacity: 0.4; cursor: default; box-shadow: none; }
+    .btn-stop { background: var(--surface); color: var(--danger); border: 1.5px solid var(--danger); }
+    .btn-stop:hover { background: rgba(239,68,68,0.1); }
     .btn-stop:active { transform: scale(0.97); }
 
-    /* Status bar */
-    .status {
-      font-size: 0.8rem;
-      color: var(--muted);
-      text-align: center;
-      min-height: 18px;
-      letter-spacing: 0.02em;
+    /* ── Vibe ───────────────────── */
+    .vibe {
+      text-align: center; font-size: 0.9rem; font-weight: 600; color: var(--accent-hover);
+      min-height: 22px; opacity: 0; transition: opacity 0.35s;
     }
-    .status.active { color: var(--accent-hover); }
+    .vibe.visible { opacity: 1; }
+
+    /* ── Status ─────────────────── */
+    .status { font-size: 0.77rem; color: var(--muted); text-align: center; min-height: 18px; letter-spacing: 0.02em; }
+    .status.active       { color: var(--accent-hover); }
     .status.beeping-text { color: #fbbf24; }
+    .status.done-text    { color: #4ade80; }
 
-    /* Volume */
-    .volume-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      width: 100%;
-    }
-    .volume-icon {
-      font-size: 1rem;
-      color: var(--muted);
-    }
-    input[type=range] {
-      flex: 1;
-      accent-color: var(--accent);
-      cursor: pointer;
-    }
-    .volume-val {
-      font-size: 0.8rem;
-      color: var(--muted);
-      min-width: 28px;
-      text-align: right;
-    }
+    /* ── Volume ─────────────────── */
+    .volume-row { display: flex; align-items: center; gap: 10px; }
+    .volume-icon { font-size: 0.95rem; color: var(--muted); }
+    input[type=range] { flex: 1; accent-color: var(--accent); cursor: pointer; }
+    .volume-val { font-size: 0.76rem; color: var(--muted); min-width: 32px; text-align: right; }
 
-    /* Tip banner */
+    /* ── Tip banner ─────────────── */
     .tip-banner {
-      width: 100%;
-      background: rgba(99,102,241,0.12);
-      border: 1px solid rgba(99,102,241,0.3);
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 0.78rem;
-      color: #a5b4fc;
-      line-height: 1.5;
-      text-align: center;
+      background: rgba(99,102,241,0.09); border: 1px solid rgba(99,102,241,0.22);
+      border-radius: 8px; padding: 10px 14px; font-size: 0.74rem; color: #a5b4fc;
+      line-height: 1.55; text-align: center;
     }
     .tip-banner strong { color: #818cf8; }
 
-    /* Wake lock / notification status pills */
-    .indicators {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
+    /* ── Pills ──────────────────── */
+    .indicators { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
     .pill {
-      font-size: 0.68rem;
-      font-weight: 600;
-      padding: 3px 9px;
-      border-radius: 20px;
-      letter-spacing: 0.04em;
-      background: var(--surface2);
-      color: var(--muted);
-      border: 1px solid var(--border);
-      transition: background 0.2s, color 0.2s, border-color 0.2s;
+      font-size: 0.64rem; font-weight: 600; padding: 3px 8px; border-radius: 20px;
+      background: var(--surface2); color: var(--muted); border: 1px solid var(--border); transition: all 0.2s;
     }
-    .pill.on {
-      background: rgba(34,197,94,0.15);
-      color: #4ade80;
-      border-color: rgba(34,197,94,0.4);
-    }
-    .pill.warn {
-      background: rgba(251,191,36,0.12);
-      color: #fbbf24;
-      border-color: rgba(251,191,36,0.35);
-    }
+    .pill.on   { background: rgba(34,197,94,0.1);  color: #4ade80; border-color: rgba(34,197,94,0.38); }
+    .pill.warn { background: rgba(251,191,36,0.09); color: #fbbf24; border-color: rgba(251,191,36,0.32); }
 
-    @media (max-width: 480px) {
-      .app { padding: 24px 16px; gap: 24px; }
+    /* ── Sprint-only ────────────── */
+    .sprint-only { display: none !important; }
+    body.sprint-mode .sprint-only { display: flex !important; }
+    body.sprint-mode .sprint-only.section { display: flex !important; flex-direction: column; }
+
+    @media (max-width: 420px) {
+      .app { padding: 0 12px; gap: 13px; }
       .clock-time { font-size: 2.3rem; }
+      .sound-btn { padding: 5px 9px; font-size: 0.73rem; }
     }
   </style>
 </head>
 <body>
 <div class="app">
 
+  <!-- Header -->
   <div class="header">
     <h1>🎯 Focus Timer</h1>
-    <p>Periodic beeps to keep you on task</p>
+    <p>ADD Sprint Companion — consistent beats intentional</p>
   </div>
 
-  <!-- Interval picker -->
-  <div class="interval-section">
-    <div class="interval-label">Beep every</div>
+  <!-- Mode tabs -->
+  <div class="mode-tabs">
+    <button class="mode-tab active" data-mode="loop">🔄 Loop</button>
+    <button class="mode-tab"        data-mode="sprint">⚡ Sprint</button>
+  </div>
+
+  <!-- Timer config -->
+  <div class="section">
+    <div class="section-label">Beep every</div>
     <div class="presets" id="presets">
       <button class="preset-btn" data-seconds="20">20s</button>
       <button class="preset-btn active" data-seconds="30">30s</button>
@@ -356,35 +260,94 @@
       <button class="preset-btn" data-seconds="120">2m</button>
       <button class="preset-btn" data-seconds="300">5m</button>
     </div>
-    <div class="custom-row">
+    <div class="row">
       <label for="customInput">Custom (sec):</label>
-      <input id="customInput" class="custom-input" type="number" min="3" max="3600" placeholder="e.g. 45" />
+      <input id="customInput" class="field-input" type="number" min="3" max="3600" placeholder="e.g. 45" />
     </div>
+    <div class="row sprint-row" id="sprintTotalRow">
+      <label for="totalMinutesInput">Total time:</label>
+      <input id="totalMinutesInput" class="field-input" type="number" min="1" max="480" placeholder="10" style="max-width:80px" />
+      <span>min</span>
+    </div>
+  </div>
+
+  <!-- Sound picker -->
+  <div class="section">
+    <div class="section-label">Sound</div>
+    <div class="sound-pills">
+      <button class="sound-btn active" data-sound="chime">🎵 Chime</button>
+      <button class="sound-btn" data-sound="beep">📡 Beep</button>
+      <button class="sound-btn" data-sound="click">👆 Click</button>
+      <button class="sound-btn" data-sound="drum">🥁 Drum</button>
+      <button class="sound-btn" data-sound="ding">🔔 Ding</button>
+    </div>
+    <div class="toggle-row">
+      <label class="toggle">
+        <input type="checkbox" id="tickToggle" checked />
+        <span class="toggle-slider"></span>
+      </label>
+      <span>3-2-1 countdown ticks before each beep</span>
+    </div>
+  </div>
+
+  <!-- Sprint Calculator (sprint mode only) -->
+  <div class="section sprint-only" id="calcSection">
+    <div class="section-label">⚡ Sprint Calculator</div>
+    <div class="calc-grid">
+      <div class="calc-field">
+        <label for="calcTotal">📦 Total items</label>
+        <input id="calcTotal" class="field-input" type="number" min="1" placeholder="100" />
+      </div>
+      <div class="calc-field">
+        <label for="calcPer">🤏 Per interval</label>
+        <input id="calcPer" class="field-input" type="number" min="1" placeholder="5" />
+      </div>
+    </div>
+    <div class="calc-result" id="calcResult">
+      <span style="color:var(--muted)">Enter items above to calculate your sprint</span>
+    </div>
+    <button class="btn-calc-start" id="btnCalcStart" disabled>⚡ Start Sprint</button>
   </div>
 
   <!-- Clock -->
   <div class="clock-wrap">
     <div class="pulse-ring" id="pulseRing"></div>
-    <svg class="clock-svg" width="180" height="180" viewBox="0 0 180 180">
-      <circle class="clock-track" cx="90" cy="90" r="80" />
-      <circle class="clock-progress" id="clockProgress" cx="90" cy="90" r="80"
-              stroke-dasharray="502.65" stroke-dashoffset="0" />
+    <svg class="clock-svg" width="194" height="194" viewBox="0 0 194 194">
+      <circle class="clock-track"    cx="97" cy="97" r="86" />
+      <circle class="clock-progress" id="clockProgress" cx="97" cy="97" r="86"
+              stroke-dasharray="540.35" stroke-dashoffset="0" />
     </svg>
     <div class="clock-display">
+      <div class="clock-sublabel" id="clockSublabel">next beep</div>
       <div class="clock-time" id="clockTime">0:30</div>
+      <div class="sprint-remain" id="sprintRemain"></div>
       <div class="clock-label" id="clockLabel">ready</div>
     </div>
     <div class="beep-badge" id="beepBadge">0 beeps</div>
   </div>
 
-  <!-- Controls -->
-  <div class="controls">
-    <button class="btn-start" id="btnStart">▶ START</button>
-    <button class="btn-stop" id="btnStop" style="display:none">■ STOP</button>
+  <!-- Progress bar -->
+  <div class="progress-section" id="progressSection" style="display:none">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-stats">
+      <span id="statIntervals">0 intervals</span>
+      <span class="stat-done" id="statItems"></span>
+    </div>
   </div>
 
+  <!-- Controls -->
+  <div class="controls">
+    <button class="btn-start" id="btnStart">▶  START</button>
+    <button class="btn-stop"  id="btnStop" style="display:none">■  STOP</button>
+  </div>
+
+  <!-- Vibe -->
+  <div class="vibe" id="vibe"></div>
+
   <!-- Status -->
-  <div class="status" id="status">Pick an interval and hit START</div>
+  <div class="status" id="status">Pick a mode and hit START</div>
 
   <!-- Volume -->
   <div class="volume-row">
@@ -395,406 +358,630 @@
 
   <!-- Tip banner -->
   <div class="tip-banner">
-    💡 <strong>Best on mobile:</strong> Tap "Add to Home Screen," keep volume on, and hit START —
-    the timer will beep even when your phone dims. For lock-screen beeps, allow notifications when prompted.
+    💡 <strong>Best on mobile:</strong> Add to Home Screen → allow notifications → keep volume on.
+    Beeps fire through lock screen. <strong>Sprint mode:</strong> enter your task count → get exact finish time → go.
   </div>
 
-  <!-- Status pills -->
+  <!-- Pills -->
   <div class="indicators">
-    <span class="pill" id="pillWake">🔆 Screen lock: –</span>
-    <span class="pill" id="pillNotif">🔔 Notifications: –</span>
+    <span class="pill" id="pillWake">🔆 Screen: –</span>
+    <span class="pill" id="pillNotif">🔔 Notifs: –</span>
     <span class="pill" id="pillPWA">📲 PWA: –</span>
   </div>
 
 </div>
-
 <script>
-  // ─────────────────────────────────────────────────────────────────────────
-  // State
-  // ─────────────────────────────────────────────────────────────────────────
-  let intervalSeconds = 30;
-  let running         = false;
-  let tickTimer       = null;
-  let elapsed         = 0;
-  let beepCount       = 0;
-  let audioCtx        = null;
-  let silentSource    = null;   // keeps AudioContext alive when screen dims
-  let wakeLock        = null;   // Screen Wake Lock
-  let swReg           = null;   // ServiceWorker registration
-  let volume          = 0.7;
+// ═════════════════════════════════════════════════════════════════════════════
+// STATE
+// ═════════════════════════════════════════════════════════════════════════════
+let mode            = 'loop';   // 'loop' | 'sprint'
+let intervalSeconds = 30;
+let totalSeconds    = 0;        // sprint total duration (seconds)
+let totalItems      = 0;        // for progress tracker
+let itemsPerInt     = 0;        // for progress tracker
 
-  const CIRCUMFERENCE = 2 * Math.PI * 80; // ~502.65
+let running         = false;
+let tickTimer       = null;
+let elapsed         = 0;
+let beepCount       = 0;
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // DOM refs
-  // ─────────────────────────────────────────────────────────────────────────
-  const clockTime     = document.getElementById('clockTime');
-  const clockLabel    = document.getElementById('clockLabel');
-  const clockProgress = document.getElementById('clockProgress');
-  const pulseRing     = document.getElementById('pulseRing');
-  const beepBadge     = document.getElementById('beepBadge');
-  const btnStart      = document.getElementById('btnStart');
-  const btnStop       = document.getElementById('btnStop');
-  const statusEl      = document.getElementById('status');
-  const volumeSlider  = document.getElementById('volumeSlider');
-  const volumeVal     = document.getElementById('volumeVal');
-  const customInput   = document.getElementById('customInput');
-  const presets       = document.querySelectorAll('.preset-btn');
-  const pillWake      = document.getElementById('pillWake');
-  const pillNotif     = document.getElementById('pillNotif');
-  const pillPWA       = document.getElementById('pillPWA');
+let audioCtx        = null;
+let silentSource    = null;
+let wakeLock        = null;
+let swReg           = null;
+let volume          = 0.7;
+let selectedSound   = 'chime';
+let ticksEnabled    = true;
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Service Worker — registers sw.js for offline + notification support
-  // ─────────────────────────────────────────────────────────────────────────
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => {
-        swReg = reg;
-        pillPWA.textContent = '📲 PWA: ready';
-        pillPWA.classList.add('on');
-      })
-      .catch(() => {
-        pillPWA.textContent = '📲 PWA: –';
-      });
-  } else {
-    pillPWA.textContent = '📲 PWA: –';
-  }
+const CIRCUM = 2 * Math.PI * 86; // ~540.35
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Wake Lock API — prevents screen from auto-locking while timer runs
-  // Supported: Chrome Android, Safari iOS 16.4+
-  // ─────────────────────────────────────────────────────────────────────────
-  async function requestWakeLock() {
-    if (!('wakeLock' in navigator)) {
-      pillWake.textContent = '🔆 Screen: unsupported';
-      pillWake.classList.add('warn');
-      return;
-    }
-    try {
-      wakeLock = await navigator.wakeLock.request('screen');
-      pillWake.textContent = '🔆 Screen: locked on';
-      pillWake.classList.add('on');
-      pillWake.classList.remove('warn');
-      // Re-acquire if page visibility changes (e.g. user tabs away and back)
-      wakeLock.addEventListener('release', () => {
-        pillWake.textContent = '🔆 Screen: released';
-        pillWake.classList.remove('on');
-        wakeLock = null;
-      });
-    } catch (err) {
-      pillWake.textContent = '🔆 Screen: blocked';
-      pillWake.classList.add('warn');
-    }
-  }
+const VIBES = [
+  "Let's go! 🚀", "Keep it moving! 💪", "You're crushing it! 🔥",
+  "Stay consistent! ⚡", "One interval at a time! 🎯", "Look at you go! 👊",
+  "Don't stop now! 💥", "Momentum is building! 📈", "You've got this! 🌟",
+  "Action creates clarity! ✨", "Progress > perfection! 🏆",
+  "Small steps, big results! 🪜", "Future you says thanks! 🙌",
+  "Beast mode activated! 🦁", "Unstoppable! 🌊",
+  "Your consistency is 🔑", "Flow state: engaged 🧠",
+  "Every interval counts! ⏱", "Keep the streak alive! 🔗",
+];
+let lastVibeIdx = -1;
 
-  async function reacquireWakeLock() {
-    if (running && !wakeLock && 'wakeLock' in navigator) {
-      await requestWakeLock();
-    }
-  }
-  // Re-acquire wake lock when tab becomes visible again
-  document.addEventListener('visibilitychange', reacquireWakeLock);
+// ═════════════════════════════════════════════════════════════════════════════
+// DOM REFS
+// ═════════════════════════════════════════════════════════════════════════════
+const clockTime         = document.getElementById('clockTime');
+const clockLabel        = document.getElementById('clockLabel');
+const clockSublabel     = document.getElementById('clockSublabel');
+const clockProgress     = document.getElementById('clockProgress');
+const sprintRemain      = document.getElementById('sprintRemain');
+const pulseRing         = document.getElementById('pulseRing');
+const beepBadge         = document.getElementById('beepBadge');
+const btnStart          = document.getElementById('btnStart');
+const btnStop           = document.getElementById('btnStop');
+const statusEl          = document.getElementById('status');
+const volumeSlider      = document.getElementById('volumeSlider');
+const volumeVal         = document.getElementById('volumeVal');
+const customInput       = document.getElementById('customInput');
+const totalMinutesInput = document.getElementById('totalMinutesInput');
+const sprintTotalRow    = document.getElementById('sprintTotalRow');
+const calcTotal         = document.getElementById('calcTotal');
+const calcPer           = document.getElementById('calcPer');
+const calcResult        = document.getElementById('calcResult');
+const btnCalcStart      = document.getElementById('btnCalcStart');
+const progressSection   = document.getElementById('progressSection');
+const progressFill      = document.getElementById('progressFill');
+const statIntervals     = document.getElementById('statIntervals');
+const statItems         = document.getElementById('statItems');
+const vibeEl            = document.getElementById('vibe');
+const tickToggle        = document.getElementById('tickToggle');
+const pillWake          = document.getElementById('pillWake');
+const pillNotif         = document.getElementById('pillNotif');
+const pillPWA           = document.getElementById('pillPWA');
+const presets           = document.querySelectorAll('.preset-btn');
 
-  function releaseWakeLock() {
-    if (wakeLock) {
-      wakeLock.release().catch(() => {});
-      wakeLock = null;
-    }
-    pillWake.textContent = '🔆 Screen lock: –';
-    pillWake.classList.remove('on', 'warn');
-  }
+// ═════════════════════════════════════════════════════════════════════════════
+// SERVICE WORKER
+// ═════════════════════════════════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(r => { swReg = r; pillPWA.textContent = '📲 PWA: ready'; pillPWA.classList.add('on'); })
+    .catch(() => {});
+}
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Notification API — fires lock-screen alerts via service worker
-  // ─────────────────────────────────────────────────────────────────────────
-  async function requestNotificationPermission() {
-    if (!('Notification' in window)) {
-      pillNotif.textContent = '🔔 Notifications: unsupported';
-      pillNotif.classList.add('warn');
-      return;
-    }
-    if (Notification.permission === 'granted') {
-      pillNotif.textContent = '🔔 Notifications: on';
-      pillNotif.classList.add('on');
-      return;
-    }
-    if (Notification.permission !== 'denied') {
-      const perm = await Notification.requestPermission();
-      if (perm === 'granted') {
-        pillNotif.textContent = '🔔 Notifications: on';
-        pillNotif.classList.add('on');
-      } else {
-        pillNotif.textContent = '🔔 Notifications: off';
-        pillNotif.classList.add('warn');
-      }
-    } else {
-      pillNotif.textContent = '🔔 Notifications: blocked';
-      pillNotif.classList.add('warn');
-    }
-  }
-
-  async function fireNotification(num) {
-    if (!swReg || Notification.permission !== 'granted') return;
-    try {
-      await swReg.showNotification('🔔 Refocus! — Beep #' + num, {
-        body: 'Focus timer fired. Stay on task!',
-        icon: 'icon.svg',
-        badge: 'icon.svg',
-        tag: 'focus-beep',       // replaces previous notification (no spam)
-        renotify: true,          // still vibrate/ring even with same tag
-        silent: false,
-        vibrate: [200, 100, 200, 100, 200],
-      });
-    } catch (e) {
-      // Notification may fail in some restricted contexts — silent fail
-    }
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Web Audio — AudioContext + silent looping buffer
-  //
-  // The silent buffer trick: a looping AudioBufferSourceNode with all-zero
-  // samples keeps the browser's audio session active even when the screen
-  // dims or the tab is backgrounded. Without this, iOS/Android suspend the
-  // AudioContext and the chimes never fire.
-  // ─────────────────────────────────────────────────────────────────────────
-  function getAudioCtx() {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    return audioCtx;
-  }
-
-  function startSilentLoop(ctx) {
-    if (silentSource) return;
-    // 1 second of silence at the context's native sample rate
-    const buffer = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
-    silentSource = ctx.createBufferSource();
-    silentSource.buffer = buffer;
-    silentSource.loop = true;
-    // Route through a GainNode at 0.001 (not quite zero — avoids some
-    // browser optimisations that would still suspend the context)
-    const keeper = ctx.createGain();
-    keeper.gain.value = 0.001;
-    silentSource.connect(keeper);
-    keeper.connect(ctx.destination);
-    silentSource.start();
-  }
-
-  function stopSilentLoop() {
-    if (silentSource) {
-      try { silentSource.stop(); } catch (_) {}
-      silentSource = null;
-    }
-  }
-
-  function playBeep() {
-    const ctx = getAudioCtx();
-    if (ctx.state === 'suspended') ctx.resume();
-
-    const now = ctx.currentTime;
-
-    // Double-tone chime: 880 Hz → 1100 Hz
-    const tones = [
-      { freq: 880,  start: now,       dur: 0.18 },
-      { freq: 1100, start: now + 0.22, dur: 0.18 },
-    ];
-
-    tones.forEach(({ freq, start, dur }) => {
-      const osc   = ctx.createOscillator();
-      osc.type    = 'sine';
-      osc.frequency.value = freq;
-
-      const tGain = ctx.createGain();
-      tGain.gain.setValueAtTime(0, start);
-      tGain.gain.linearRampToValueAtTime(volume * 0.6, start + 0.02);
-      tGain.gain.exponentialRampToValueAtTime(0.001, start + dur);
-
-      osc.connect(tGain);
-      tGain.connect(ctx.destination);
-      osc.start(start);
-      osc.stop(start + dur + 0.05);
-    });
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Interval selection
-  // ─────────────────────────────────────────────────────────────────────────
-  presets.forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (running) return;
-      presets.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      customInput.value = '';
-      intervalSeconds = parseInt(btn.dataset.seconds);
-      resetDisplay();
-    });
-  });
-
-  customInput.addEventListener('input', () => {
-    const val = parseInt(customInput.value);
-    if (!isNaN(val) && val >= 3) {
-      presets.forEach(b => b.classList.remove('active'));
-      intervalSeconds = val;
-      if (!running) resetDisplay();
-    }
-  });
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Volume
-  // ─────────────────────────────────────────────────────────────────────────
-  volumeSlider.addEventListener('input', () => {
-    volume = volumeSlider.value / 100;
-    volumeVal.textContent = volumeSlider.value + '%';
-  });
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Display helpers
-  // ─────────────────────────────────────────────────────────────────────────
-  function formatTime(sec) {
-    if (sec < 60) return '0:' + String(sec).padStart(2, '0');
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    return m + ':' + String(s).padStart(2, '0');
-  }
-
-  function updateClock(remaining) {
-    clockTime.textContent = formatTime(remaining);
-    const frac   = remaining / intervalSeconds;
-    const offset = CIRCUMFERENCE * (1 - frac);
-    clockProgress.style.strokeDashoffset = offset;
-  }
-
-  function resetDisplay() {
-    updateClock(intervalSeconds);
-    clockLabel.textContent = 'ready';
-    clockTime.style.color = '';
-    clockProgress.style.stroke = 'var(--accent)';
-    beepBadge.classList.remove('visible');
-    statusEl.textContent = 'Pick an interval and hit START';
-    statusEl.className = 'status';
-  }
-
-  function triggerBeepVisuals() {
-    clockTime.style.color = '#f87171';
-    clockProgress.style.stroke = '#f87171';
-    setTimeout(() => {
-      clockTime.style.color = '';
-      clockProgress.style.stroke = 'var(--accent)';
-    }, 400);
-
-    pulseRing.classList.remove('beeping');
-    void pulseRing.offsetWidth;
-    pulseRing.classList.add('beeping');
-
-    beepCount++;
-    beepBadge.textContent = beepCount + (beepCount === 1 ? ' beep' : ' beeps');
-    beepBadge.classList.add('visible');
-
-    statusEl.textContent = '🔔 Beep #' + beepCount + ' — refocus!';
-    statusEl.className = 'status beeping-text';
-    setTimeout(() => {
-      if (running) {
-        statusEl.textContent = 'Next beep in ' + formatTime(intervalSeconds) + '…';
-        statusEl.className = 'status active';
-      }
-    }, 1500);
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Timer core
-  // ─────────────────────────────────────────────────────────────────────────
-  function tick() {
-    elapsed++;
-    const remaining = intervalSeconds - (elapsed % intervalSeconds);
-    updateClock(remaining === intervalSeconds ? intervalSeconds : remaining);
-    clockLabel.textContent = 'counting';
-
-    if (elapsed % intervalSeconds === 0) {
-      playBeep();
-      triggerBeepVisuals();
-      fireNotification(beepCount + 1); // fires before beepCount increments in triggerBeepVisuals
-    }
-  }
-
-  async function startTimer() {
+// ═════════════════════════════════════════════════════════════════════════════
+// MODE SWITCHING
+// ═════════════════════════════════════════════════════════════════════════════
+document.querySelectorAll('.mode-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
     if (running) return;
-    const customVal = parseInt(customInput.value);
-    if (!isNaN(customVal) && customVal >= 3) intervalSeconds = customVal;
-    if (intervalSeconds < 3) { alert('Please set an interval of at least 3 seconds.'); return; }
+    document.querySelectorAll('.mode-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    mode = btn.dataset.mode;
+    document.body.classList.toggle('sprint-mode', mode === 'sprint');
+    sprintTotalRow.classList.toggle('visible', mode === 'sprint');
+    totalSeconds = 0;
+    resetDisplay();
+  });
+});
 
-    running   = true;
-    elapsed   = 0;
-    beepCount = 0;
-    beepBadge.classList.remove('visible');
+// ═════════════════════════════════════════════════════════════════════════════
+// INTERVAL SELECTION
+// ═════════════════════════════════════════════════════════════════════════════
+presets.forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (running) return;
+    presets.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    customInput.value = '';
+    intervalSeconds = parseInt(btn.dataset.seconds);
+    updateCalcResult();
+    if (!running) resetDisplay();
+  });
+});
 
-    btnStart.style.display = 'none';
-    btnStop.style.display  = 'block';
-    customInput.disabled   = true;
-    presets.forEach(b => b.disabled = true);
+customInput.addEventListener('input', () => {
+  const v = parseInt(customInput.value);
+  if (!isNaN(v) && v >= 3) {
+    presets.forEach(b => b.classList.remove('active'));
+    intervalSeconds = v;
+    updateCalcResult();
+    if (!running) resetDisplay();
+  }
+});
 
-    updateClock(intervalSeconds);
-    clockLabel.textContent = 'counting';
-    statusEl.textContent   = 'Next beep in ' + formatTime(intervalSeconds) + '…';
-    statusEl.className     = 'status active';
+totalMinutesInput.addEventListener('input', () => {
+  const v = parseFloat(totalMinutesInput.value);
+  if (!isNaN(v) && v > 0) totalSeconds = Math.round(v * 60);
+});
 
-    // ── Fire up all the "keep alive" machinery ──
+// ═════════════════════════════════════════════════════════════════════════════
+// SOUND SELECTION
+// ═════════════════════════════════════════════════════════════════════════════
+document.querySelectorAll('.sound-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sound-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedSound = btn.dataset.sound;
     const ctx = getAudioCtx();
-    if (ctx.state === 'suspended') await ctx.resume();
-    startSilentLoop(ctx);       // 1. silent loop → keeps AudioContext alive
-    await requestWakeLock();    // 2. wake lock → screen stays on
-    await requestNotificationPermission(); // 3. ask once for notifications
+    if (ctx.state === 'suspended') ctx.resume().then(() => playSound(selectedSound));
+    else playSound(selectedSound);
+  });
+});
 
-    tickTimer = setInterval(tick, 1000);
+tickToggle.addEventListener('change', () => { ticksEnabled = tickToggle.checked; });
+
+// ═════════════════════════════════════════════════════════════════════════════
+// SPRINT CALCULATOR
+// ═════════════════════════════════════════════════════════════════════════════
+function updateCalcResult() {
+  const tot = parseInt(calcTotal.value);
+  const per = parseInt(calcPer.value);
+  if (isNaN(tot) || isNaN(per) || tot < 1 || per < 1) {
+    calcResult.innerHTML = '<span style="color:var(--muted)">Enter items above to calculate your sprint</span>';
+    btnCalcStart.disabled = true;
+    return;
   }
+  const intervals = Math.ceil(tot / per);
+  const secs      = intervals * intervalSeconds;
+  const mins      = secs / 60;
+  const intLabel  = intervalSeconds >= 60 ? (intervalSeconds / 60) + 'm' : intervalSeconds + 's';
+  const timeLabel = mins < 1   ? secs + ' sec'
+                  : mins === Math.floor(mins) ? mins + ' min'
+                  : Math.round(mins * 10) / 10 + ' min';
 
-  function stopTimer() {
-    if (!running) return;
-    running = false;
-    clearInterval(tickTimer);
-    tickTimer = null;
-    elapsed   = 0;
+  calcResult.innerHTML =
+    `<span class="hi">${per} items</span> every <span class="hi">${intLabel}</span> → ` +
+    `<span class="hi">${intervals} intervals</span> → ` +
+    `done in <span class="hi">${timeLabel}</span> 🎯`;
 
-    btnStart.style.display = 'block';
-    btnStop.style.display  = 'none';
-    customInput.disabled   = false;
-    presets.forEach(b => b.disabled = false);
+  totalItems  = tot;
+  itemsPerInt = per;
+  totalSeconds = secs;
+  btnCalcStart.disabled = false;
+}
 
-    clockLabel.textContent = 'stopped';
-    clockProgress.style.stroke = 'var(--accent)';
-    clockTime.style.color  = '';
-    updateClock(intervalSeconds);
+calcTotal.addEventListener('input', updateCalcResult);
+calcPer.addEventListener('input',   updateCalcResult);
 
-    // Release all "keep alive" resources
-    stopSilentLoop();
-    releaseWakeLock();
-
-    const summary = beepCount > 0
-      ? `Stopped after ${beepCount} beep${beepCount === 1 ? '' : 's'}`
-      : 'Stopped';
-    statusEl.textContent = summary;
-    statusEl.className   = 'status';
+btnCalcStart.addEventListener('click', () => {
+  if (!totalSeconds || totalSeconds < intervalSeconds) {
+    alert('Fill in items + per-interval first, and make sure total > interval.');
+    return;
   }
+  startTimer();
+});
 
-  btnStart.addEventListener('click', startTimer);
-  btnStop.addEventListener('click', stopTimer);
+// ═════════════════════════════════════════════════════════════════════════════
+// WAKE LOCK
+// ═════════════════════════════════════════════════════════════════════════════
+async function requestWakeLock() {
+  if (!('wakeLock' in navigator)) {
+    pillWake.textContent = '🔆 Screen: N/A'; pillWake.classList.add('warn'); return;
+  }
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    pillWake.textContent = '🔆 Screen: on'; pillWake.classList.add('on'); pillWake.classList.remove('warn');
+    wakeLock.addEventListener('release', () => {
+      wakeLock = null; pillWake.textContent = '🔆 Screen: released'; pillWake.classList.remove('on');
+    });
+  } catch {
+    pillWake.textContent = '🔆 Screen: blocked'; pillWake.classList.add('warn');
+  }
+}
+document.addEventListener('visibilitychange', () => { if (running && !wakeLock) requestWakeLock(); });
+function releaseWakeLock() {
+  if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+  pillWake.textContent = '🔆 Screen: –'; pillWake.classList.remove('on', 'warn');
+}
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Init
-  // ─────────────────────────────────────────────────────────────────────────
-  resetDisplay();
+// ═════════════════════════════════════════════════════════════════════════════
+// NOTIFICATIONS
+// ═════════════════════════════════════════════════════════════════════════════
+async function requestNotificationPermission() {
+  if (!('Notification' in window)) { pillNotif.textContent = '🔔 Notifs: N/A'; pillNotif.classList.add('warn'); return; }
+  if (Notification.permission === 'granted') { pillNotif.textContent = '🔔 Notifs: on'; pillNotif.classList.add('on'); return; }
+  if (Notification.permission !== 'denied') {
+    const p = await Notification.requestPermission();
+    pillNotif.textContent = p === 'granted' ? '🔔 Notifs: on' : '🔔 Notifs: off';
+    p === 'granted' ? pillNotif.classList.add('on') : pillNotif.classList.add('warn');
+  }
+}
+async function fireNotification(num, isFinish) {
+  if (!swReg || Notification.permission !== 'granted') return;
+  try {
+    if (isFinish) {
+      await swReg.showNotification('🏆 Sprint complete!', {
+        body: `Done! ${num} beeps${totalItems > 0 ? ` · ~${Math.floor(num) * itemsPerInt} items cleared` : ''}.`,
+        icon: 'icon.svg', tag: 'focus-done', vibrate: [200,100,200,100,400],
+      });
+    } else {
+      await swReg.showNotification(`🔔 Beep #${num} — Refocus!`, {
+        body: 'Focus timer fired. Stay on task!',
+        icon: 'icon.svg', badge: 'icon.svg', tag: 'focus-beep',
+        renotify: true, silent: false, vibrate: [200, 100, 200],
+      });
+    }
+  } catch {}
+}
 
-  // Show notification pill initial state
-  if ('Notification' in window && Notification.permission === 'granted') {
-    pillNotif.textContent = '🔔 Notifications: on';
-    pillNotif.classList.add('on');
-  } else if ('Notification' in window && Notification.permission === 'denied') {
-    pillNotif.textContent = '🔔 Notifications: blocked';
-    pillNotif.classList.add('warn');
+// ═════════════════════════════════════════════════════════════════════════════
+// WEB AUDIO — AudioContext + silence loop + all sound variants
+// ═════════════════════════════════════════════════════════════════════════════
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+// Silent looping buffer keeps AudioContext alive when screen dims/locks
+function startSilentLoop(ctx) {
+  if (silentSource) return;
+  const buf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+  silentSource = ctx.createBufferSource();
+  silentSource.buffer = buf; silentSource.loop = true;
+  const g = ctx.createGain(); g.gain.value = 0.001;
+  silentSource.connect(g); g.connect(ctx.destination);
+  silentSource.start();
+}
+function stopSilentLoop() {
+  if (silentSource) { try { silentSource.stop(); } catch {} silentSource = null; }
+}
+
+// Low-level tone helper
+function tone(ctx, freq, t0, dur, vol, type = 'sine', attack = 0.02) {
+  const osc = ctx.createOscillator();
+  const g   = ctx.createGain();
+  osc.type = type; osc.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol, t0 + attack);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  osc.connect(g); g.connect(ctx.destination);
+  osc.start(t0); osc.stop(t0 + dur + 0.05);
+}
+
+// 5 distinct sounds
+function sndChime() {
+  const ctx = getAudioCtx(), t = ctx.currentTime;
+  tone(ctx, 880,  t,        0.20, volume * 0.55);
+  tone(ctx, 1100, t + 0.24, 0.20, volume * 0.55);
+}
+function sndBeep() {
+  const ctx = getAudioCtx(), t = ctx.currentTime;
+  tone(ctx, 1000, t, 0.13, volume * 0.6, 'square', 0.005);
+}
+function sndClick() {
+  const ctx = getAudioCtx(), t = ctx.currentTime;
+  tone(ctx, 2200, t,        0.035, volume * 0.5, 'square', 0.003);
+  tone(ctx, 1500, t + 0.01, 0.030, volume * 0.3, 'sine',   0.003);
+}
+function sndDrum() {
+  const ctx = getAudioCtx(), t = ctx.currentTime;
+  // Kick: frequency sweep 90→40 Hz
+  const osc = ctx.createOscillator(), g = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(90, t);
+  osc.frequency.exponentialRampToValueAtTime(40, t + 0.14);
+  g.gain.setValueAtTime(volume * 0.85, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+  osc.connect(g); g.connect(ctx.destination);
+  osc.start(t); osc.stop(t + 0.32);
+  // Body click
+  tone(ctx, 280, t, 0.025, volume * 0.3, 'sawtooth', 0.001);
+}
+function sndDing() {
+  const ctx = getAudioCtx(), t = ctx.currentTime;
+  // Bell harmonics: fundamental + 2nd + 3rd
+  tone(ctx, 1320, t, 0.70, volume * 0.50, 'sine', 0.01);
+  tone(ctx, 2640, t, 0.35, volume * 0.20, 'sine', 0.01);
+  tone(ctx, 3960, t, 0.18, volume * 0.08, 'sine', 0.01);
+}
+
+function playSound(s) {
+  const ctx = getAudioCtx();
+  if (ctx.state === 'suspended') ctx.resume();
+  ({ chime: sndChime, beep: sndBeep, click: sndClick, drum: sndDrum, ding: sndDing }[s] || sndChime)();
+}
+
+// Soft countdown tick (3-2-1 before each beep)
+function playTick() {
+  if (!ticksEnabled) return;
+  const ctx = getAudioCtx(), t = ctx.currentTime;
+  tone(ctx, 1800, t, 0.035, volume * 0.12, 'sine', 0.003);
+}
+
+// Victory fanfare (sprint finish)
+function playVictory() {
+  const ctx = getAudioCtx(), t = ctx.currentTime;
+  [523, 659, 784, 1047].forEach((f, i) => tone(ctx, f, t + i * 0.13, 0.28, volume * 0.5));
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// DISPLAY HELPERS
+// ═════════════════════════════════════════════════════════════════════════════
+function fmt(s) {
+  if (s <= 0) return '0:00';
+  if (s < 60) return '0:' + String(s).padStart(2, '0');
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
+
+function updateClock(remainInInterval, overallFrac) {
+  // Number shown: always time to next beep
+  clockTime.textContent = fmt(remainInInterval <= 0 ? intervalSeconds : remainInInterval);
+  // Ring: sprint=overall progress, loop=interval progress
+  const frac   = mode === 'sprint' ? (overallFrac || 0) : (remainInInterval / intervalSeconds);
+  clockProgress.style.strokeDashoffset = CIRCUM * (1 - Math.max(0, Math.min(1, frac)));
+}
+
+function resetDisplay() {
+  clockTime.textContent  = fmt(intervalSeconds);
+  clockLabel.textContent = 'ready';
+  clockTime.style.color  = '';
+  clockProgress.style.stroke = 'var(--accent)';
+  clockProgress.style.strokeDashoffset = 0;
+  clockSublabel.style.display = 'none';
+  sprintRemain.style.display  = 'none';
+  sprintRemain.textContent    = '';
+  beepBadge.classList.remove('visible');
+  progressSection.style.display = 'none';
+  progressFill.style.width = '0%';
+  vibeEl.classList.remove('visible');
+  vibeEl.textContent = '';
+  statusEl.textContent = mode === 'sprint'
+    ? 'Configure your sprint, then hit START'
+    : 'Pick an interval and hit START';
+  statusEl.className = 'status';
+}
+
+function showVibe() {
+  let idx;
+  do { idx = Math.floor(Math.random() * VIBES.length); } while (idx === lastVibeIdx && VIBES.length > 1);
+  lastVibeIdx = idx;
+  vibeEl.classList.remove('visible');
+  setTimeout(() => { vibeEl.textContent = VIBES[idx]; vibeEl.classList.add('visible'); }, 80);
+}
+
+function refreshProgress() {
+  const completedIntervals = Math.floor(elapsed / intervalSeconds);
+  const estItems = completedIntervals * itemsPerInt;
+
+  progressSection.style.display = 'flex';
+
+  if (mode === 'sprint' && totalSeconds > 0) {
+    const pct = Math.min(100, (elapsed / totalSeconds) * 100);
+    progressFill.style.width = pct + '%';
+    const totalInt = Math.ceil(totalSeconds / intervalSeconds);
+    statIntervals.textContent = completedIntervals + ' / ' + totalInt + ' intervals';
+    statItems.textContent = totalItems > 0
+      ? estItems + ' / ' + totalItems + ' items ✓'
+      : completedIntervals + ' beeps';
   } else {
-    pillNotif.textContent = '🔔 Notifications: tap Start';
+    progressFill.style.width = '0%'; // no known total in loop mode
+    statIntervals.textContent = completedIntervals + ' intervals done';
+    statItems.textContent = itemsPerInt > 0
+      ? '~' + estItems + ' items ✓'
+      : beepCount + ' beep' + (beepCount !== 1 ? 's' : '');
   }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// TICK — fires every second
+// ═════════════════════════════════════════════════════════════════════════════
+function tick() {
+  elapsed++;
+
+  // Sprint: check for finish
+  if (mode === 'sprint' && totalSeconds > 0 && elapsed >= totalSeconds) {
+    playVictory();
+    beepCount++;
+    beepBadge.textContent = beepCount + ' beep' + (beepCount !== 1 ? 's' : '');
+    beepBadge.classList.add('visible');
+    fireNotification(beepCount, true);
+    finishSprint();
+    return;
+  }
+
+  const remainInInterval = intervalSeconds - (elapsed % intervalSeconds);
+  const overallFrac      = (mode === 'sprint' && totalSeconds > 0) ? elapsed / totalSeconds : 0;
+
+  updateClock(remainInInterval, overallFrac);
+  clockLabel.textContent = 'counting';
+
+  // Sprint: update time-remaining display inside clock
+  if (mode === 'sprint' && totalSeconds > 0) {
+    const left = totalSeconds - elapsed;
+    sprintRemain.style.display = 'block';
+    sprintRemain.textContent   = fmt(left) + ' left';
+  }
+
+  // Countdown ticks: soft click at 3, 2, 1 seconds before beep
+  if (remainInInterval <= 3 && elapsed % intervalSeconds !== 0) {
+    playTick();
+  }
+
+  // Main beep when interval completes
+  if (elapsed % intervalSeconds === 0) {
+    playSound(selectedSound);
+    triggerBeepVisuals();
+  }
+
+  refreshProgress();
+}
+
+function triggerBeepVisuals() {
+  // Flash red
+  clockTime.style.color = '#f87171';
+  clockProgress.style.stroke = '#f87171';
+  setTimeout(() => { clockTime.style.color = ''; clockProgress.style.stroke = 'var(--accent)'; }, 420);
+
+  // Pulse ring
+  pulseRing.classList.remove('beeping');
+  void pulseRing.offsetWidth;
+  pulseRing.classList.add('beeping');
+
+  beepCount++;
+  beepBadge.textContent = beepCount + ' beep' + (beepCount !== 1 ? 's' : '');
+  beepBadge.classList.add('visible');
+
+  showVibe();
+  fireNotification(beepCount, false);
+
+  statusEl.textContent = '🔔 Beep #' + beepCount + ' — refocus!';
+  statusEl.className = 'status beeping-text';
+  setTimeout(() => {
+    if (!running) return;
+    const next = (mode === 'sprint' && totalSeconds > 0)
+      ? fmt(totalSeconds - elapsed) + ' total remaining'
+      : 'Next beep in ' + fmt(intervalSeconds) + '…';
+    statusEl.textContent = next;
+    statusEl.className = 'status active';
+  }, 1600);
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// SPRINT FINISH
+// ═════════════════════════════════════════════════════════════════════════════
+function finishSprint() {
+  running = false;
+  clearInterval(tickTimer); tickTimer = null;
+
+  btnStart.style.display = 'block';
+  btnStop.style.display  = 'none';
+  setInputsDisabled(false);
+
+  clockTime.style.color = '#4ade80';
+  clockProgress.style.stroke = '#4ade80';
+  clockProgress.style.strokeDashoffset = 0;
+  clockLabel.textContent = 'done! 🎉';
+  sprintRemain.style.display  = 'block';
+  sprintRemain.textContent    = 'Sprint complete!';
+  sprintRemain.style.color    = '#4ade80';
+
+  stopSilentLoop();
+  releaseWakeLock();
+
+  const completedIntervals = Math.floor(elapsed / intervalSeconds);
+  const estItems = completedIntervals * itemsPerInt;
+  statusEl.textContent = `🏆 Sprint done! ${beepCount} beeps${totalItems > 0 ? ` · ~${estItems} items cleared` : ''}`;
+  statusEl.className = 'status done-text';
+
+  vibeEl.textContent = '🏆 Sprint complete! You absolutely crushed it!';
+  vibeEl.classList.add('visible');
+
+  progressFill.style.width = '100%';
+  statIntervals.textContent = completedIntervals + ' intervals done';
+  if (totalItems > 0) statItems.textContent = estItems + ' / ' + totalItems + ' items ✓';
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// START / STOP
+// ═════════════════════════════════════════════════════════════════════════════
+function setInputsDisabled(disabled) {
+  [customInput, totalMinutesInput, calcTotal, calcPer].forEach(el => el.disabled = disabled);
+  btnCalcStart.disabled = disabled;
+  document.querySelectorAll('.mode-tab, .preset-btn').forEach(b => b.disabled = disabled);
+}
+
+async function startTimer() {
+  if (running) return;
+
+  const customVal = parseInt(customInput.value);
+  if (!isNaN(customVal) && customVal >= 3) intervalSeconds = customVal;
+  if (intervalSeconds < 3) { alert('Interval must be at least 3 seconds.'); return; }
+
+  if (mode === 'sprint') {
+    const manualMins = parseFloat(totalMinutesInput.value);
+    if (!isNaN(manualMins) && manualMins > 0 && totalSeconds === 0)
+      totalSeconds = Math.round(manualMins * 60);
+    if (totalSeconds < intervalSeconds) {
+      alert('Total sprint time must be longer than the interval length.');
+      return;
+    }
+  }
+
+  running = true; elapsed = 0; beepCount = 0;
+  beepBadge.classList.remove('visible');
+  clockTime.style.color = '';
+  clockProgress.style.stroke = 'var(--accent)';
+  sprintRemain.style.color = '';
+
+  btnStart.style.display = 'none';
+  btnStop.style.display  = 'block';
+  setInputsDisabled(true);
+
+  clockLabel.textContent = 'counting';
+  if (mode === 'sprint' && totalSeconds > 0) {
+    clockSublabel.style.display = 'block';
+    sprintRemain.style.display  = 'block';
+    sprintRemain.textContent    = fmt(totalSeconds) + ' left';
+  }
+  statusEl.textContent = mode === 'sprint'
+    ? 'Sprint started! First beep in ' + fmt(intervalSeconds) + '…'
+    : 'Next beep in ' + fmt(intervalSeconds) + '…';
+  statusEl.className = 'status active';
+  refreshProgress();
+
+  const ctx = getAudioCtx();
+  if (ctx.state === 'suspended') await ctx.resume();
+  startSilentLoop(ctx);
+  await requestWakeLock();
+  await requestNotificationPermission();
+
+  tickTimer = setInterval(tick, 1000);
+}
+
+function stopTimer() {
+  if (!running) return;
+  running = false;
+  clearInterval(tickTimer); tickTimer = null; elapsed = 0;
+
+  btnStart.style.display = 'block';
+  btnStop.style.display  = 'none';
+  setInputsDisabled(false);
+
+  clockTime.style.color = '';
+  clockText: clockTime.textContent = fmt(intervalSeconds);
+  clockLabel.textContent = 'stopped';
+  clockProgress.style.stroke = 'var(--accent)';
+  clockProgress.style.strokeDashoffset = 0;
+  clockSublabel.style.display = 'none';
+  sprintRemain.style.display  = 'none';
+  sprintRemain.style.color    = '';
+
+  stopSilentLoop();
+  releaseWakeLock();
+
+  const estItems = beepCount * itemsPerInt;
+  statusEl.textContent = beepCount > 0
+    ? `Stopped — ${beepCount} beep${beepCount !== 1 ? 's' : ''}${itemsPerInt > 0 ? ` · ~${estItems} items done` : ''}`
+    : 'Stopped';
+  statusEl.className = 'status';
+  vibeEl.classList.remove('visible');
+}
+
+btnStart.addEventListener('click', startTimer);
+btnStop.addEventListener('click',  stopTimer);
+
+// ═════════════════════════════════════════════════════════════════════════════
+// VOLUME
+// ═════════════════════════════════════════════════════════════════════════════
+volumeSlider.addEventListener('input', () => {
+  volume = volumeSlider.value / 100;
+  volumeVal.textContent = volumeSlider.value + '%';
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// INIT
+// ═════════════════════════════════════════════════════════════════════════════
+resetDisplay();
+
+if ('Notification' in window) {
+  if (Notification.permission === 'granted')
+    { pillNotif.textContent = '🔔 Notifs: on'; pillNotif.classList.add('on'); }
+  else if (Notification.permission === 'denied')
+    { pillNotif.textContent = '🔔 Notifs: blocked'; pillNotif.classList.add('warn'); }
+  else
+    { pillNotif.textContent = '🔔 Notifs: tap Start'; }
+}
 </script>
 </body>
 </html>
