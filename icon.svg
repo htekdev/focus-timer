@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <!-- Dark background circle -->
+  <circle cx="96" cy="96" r="96" fill="#0d0d0f"/>
+  <!-- Timer ring track -->
+  <circle cx="96" cy="96" r="72" fill="none" stroke="#27272a" stroke-width="10"/>
+  <!-- Timer ring progress arc (~270° = 3/4 full) -->
+  <circle cx="96" cy="96" r="72" fill="none" stroke="#6366f1" stroke-width="10"
+    stroke-linecap="round"
+    stroke-dasharray="339 113"
+    transform="rotate(-90 96 96)"/>
+  <!-- Center clock hand dot -->
+  <circle cx="96" cy="96" r="6" fill="#6366f1"/>
+  <!-- Clock hand pointing up-right -->
+  <line x1="96" y1="96" x2="126" y2="66" stroke="#6366f1" stroke-width="5" stroke-linecap="round"/>
+  <!-- Short minute-ish hand -->
+  <line x1="96" y1="96" x2="96" y2="62" stroke="#a5b4fc" stroke-width="4" stroke-linecap="round"/>
+  <!-- Bell icon at top -->
+  <text x="96" y="44" text-anchor="middle" font-size="20" fill="#818cf8">🎯</text>
+</svg>
