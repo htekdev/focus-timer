@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0d0d0f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Focus Timer" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon.svg" />
   <title>Focus Timer</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -283,6 +289,49 @@
       text-align: right;
     }
 
+    /* Tip banner */
+    .tip-banner {
+      width: 100%;
+      background: rgba(99,102,241,0.12);
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.78rem;
+      color: #a5b4fc;
+      line-height: 1.5;
+      text-align: center;
+    }
+    .tip-banner strong { color: #818cf8; }
+
+    /* Wake lock / notification status pills */
+    .indicators {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .pill {
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 20px;
+      letter-spacing: 0.04em;
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .pill.on {
+      background: rgba(34,197,94,0.15);
+      color: #4ade80;
+      border-color: rgba(34,197,94,0.4);
+    }
+    .pill.warn {
+      background: rgba(251,191,36,0.12);
+      color: #fbbf24;
+      border-color: rgba(251,191,36,0.35);
+    }
+
     @media (max-width: 480px) {
       .app { padding: 24px 16px; gap: 24px; }
       .clock-time { font-size: 2.3rem; }
@@ -344,21 +393,41 @@
     <span class="volume-val" id="volumeVal">70%</span>
   </div>
 
+  <!-- Tip banner -->
+  <div class="tip-banner">
+    💡 <strong>Best on mobile:</strong> Tap "Add to Home Screen," keep volume on, and hit START —
+    the timer will beep even when your phone dims. For lock-screen beeps, allow notifications when prompted.
+  </div>
+
+  <!-- Status pills -->
+  <div class="indicators">
+    <span class="pill" id="pillWake">🔆 Screen lock: –</span>
+    <span class="pill" id="pillNotif">🔔 Notifications: –</span>
+    <span class="pill" id="pillPWA">📲 PWA: –</span>
+  </div>
+
 </div>
 
 <script>
-  // ── State ──────────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
+  // State
+  // ─────────────────────────────────────────────────────────────────────────
   let intervalSeconds = 30;
-  let running = false;
-  let tickTimer = null;
-  let elapsed = 0;
-  let beepCount = 0;
-  let audioCtx = null;
-  let volume = 0.7;
+  let running         = false;
+  let tickTimer       = null;
+  let elapsed         = 0;
+  let beepCount       = 0;
+  let audioCtx        = null;
+  let silentSource    = null;   // keeps AudioContext alive when screen dims
+  let wakeLock        = null;   // Screen Wake Lock
+  let swReg           = null;   // ServiceWorker registration
+  let volume          = 0.7;
 
   const CIRCUMFERENCE = 2 * Math.PI * 80; // ~502.65
 
-  // ── DOM refs ───────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
+  // DOM refs
+  // ─────────────────────────────────────────────────────────────────────────
   const clockTime     = document.getElementById('clockTime');
   const clockLabel    = document.getElementById('clockLabel');
   const clockProgress = document.getElementById('clockProgress');
@@ -371,8 +440,187 @@
   const volumeVal     = document.getElementById('volumeVal');
   const customInput   = document.getElementById('customInput');
   const presets       = document.querySelectorAll('.preset-btn');
+  const pillWake      = document.getElementById('pillWake');
+  const pillNotif     = document.getElementById('pillNotif');
+  const pillPWA       = document.getElementById('pillPWA');
 
-  // ── Interval selection ─────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
+  // Service Worker — registers sw.js for offline + notification support
+  // ─────────────────────────────────────────────────────────────────────────
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => {
+        swReg = reg;
+        pillPWA.textContent = '📲 PWA: ready';
+        pillPWA.classList.add('on');
+      })
+      .catch(() => {
+        pillPWA.textContent = '📲 PWA: –';
+      });
+  } else {
+    pillPWA.textContent = '📲 PWA: –';
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Wake Lock API — prevents screen from auto-locking while timer runs
+  // Supported: Chrome Android, Safari iOS 16.4+
+  // ─────────────────────────────────────────────────────────────────────────
+  async function requestWakeLock() {
+    if (!('wakeLock' in navigator)) {
+      pillWake.textContent = '🔆 Screen: unsupported';
+      pillWake.classList.add('warn');
+      return;
+    }
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      pillWake.textContent = '🔆 Screen: locked on';
+      pillWake.classList.add('on');
+      pillWake.classList.remove('warn');
+      // Re-acquire if page visibility changes (e.g. user tabs away and back)
+      wakeLock.addEventListener('release', () => {
+        pillWake.textContent = '🔆 Screen: released';
+        pillWake.classList.remove('on');
+        wakeLock = null;
+      });
+    } catch (err) {
+      pillWake.textContent = '🔆 Screen: blocked';
+      pillWake.classList.add('warn');
+    }
+  }
+
+  async function reacquireWakeLock() {
+    if (running && !wakeLock && 'wakeLock' in navigator) {
+      await requestWakeLock();
+    }
+  }
+  // Re-acquire wake lock when tab becomes visible again
+  document.addEventListener('visibilitychange', reacquireWakeLock);
+
+  function releaseWakeLock() {
+    if (wakeLock) {
+      wakeLock.release().catch(() => {});
+      wakeLock = null;
+    }
+    pillWake.textContent = '🔆 Screen lock: –';
+    pillWake.classList.remove('on', 'warn');
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Notification API — fires lock-screen alerts via service worker
+  // ─────────────────────────────────────────────────────────────────────────
+  async function requestNotificationPermission() {
+    if (!('Notification' in window)) {
+      pillNotif.textContent = '🔔 Notifications: unsupported';
+      pillNotif.classList.add('warn');
+      return;
+    }
+    if (Notification.permission === 'granted') {
+      pillNotif.textContent = '🔔 Notifications: on';
+      pillNotif.classList.add('on');
+      return;
+    }
+    if (Notification.permission !== 'denied') {
+      const perm = await Notification.requestPermission();
+      if (perm === 'granted') {
+        pillNotif.textContent = '🔔 Notifications: on';
+        pillNotif.classList.add('on');
+      } else {
+        pillNotif.textContent = '🔔 Notifications: off';
+        pillNotif.classList.add('warn');
+      }
+    } else {
+      pillNotif.textContent = '🔔 Notifications: blocked';
+      pillNotif.classList.add('warn');
+    }
+  }
+
+  async function fireNotification(num) {
+    if (!swReg || Notification.permission !== 'granted') return;
+    try {
+      await swReg.showNotification('🔔 Refocus! — Beep #' + num, {
+        body: 'Focus timer fired. Stay on task!',
+        icon: 'icon.svg',
+        badge: 'icon.svg',
+        tag: 'focus-beep',       // replaces previous notification (no spam)
+        renotify: true,          // still vibrate/ring even with same tag
+        silent: false,
+        vibrate: [200, 100, 200, 100, 200],
+      });
+    } catch (e) {
+      // Notification may fail in some restricted contexts — silent fail
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Web Audio — AudioContext + silent looping buffer
+  //
+  // The silent buffer trick: a looping AudioBufferSourceNode with all-zero
+  // samples keeps the browser's audio session active even when the screen
+  // dims or the tab is backgrounded. Without this, iOS/Android suspend the
+  // AudioContext and the chimes never fire.
+  // ─────────────────────────────────────────────────────────────────────────
+  function getAudioCtx() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioCtx;
+  }
+
+  function startSilentLoop(ctx) {
+    if (silentSource) return;
+    // 1 second of silence at the context's native sample rate
+    const buffer = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+    silentSource = ctx.createBufferSource();
+    silentSource.buffer = buffer;
+    silentSource.loop = true;
+    // Route through a GainNode at 0.001 (not quite zero — avoids some
+    // browser optimisations that would still suspend the context)
+    const keeper = ctx.createGain();
+    keeper.gain.value = 0.001;
+    silentSource.connect(keeper);
+    keeper.connect(ctx.destination);
+    silentSource.start();
+  }
+
+  function stopSilentLoop() {
+    if (silentSource) {
+      try { silentSource.stop(); } catch (_) {}
+      silentSource = null;
+    }
+  }
+
+  function playBeep() {
+    const ctx = getAudioCtx();
+    if (ctx.state === 'suspended') ctx.resume();
+
+    const now = ctx.currentTime;
+
+    // Double-tone chime: 880 Hz → 1100 Hz
+    const tones = [
+      { freq: 880,  start: now,       dur: 0.18 },
+      { freq: 1100, start: now + 0.22, dur: 0.18 },
+    ];
+
+    tones.forEach(({ freq, start, dur }) => {
+      const osc   = ctx.createOscillator();
+      osc.type    = 'sine';
+      osc.frequency.value = freq;
+
+      const tGain = ctx.createGain();
+      tGain.gain.setValueAtTime(0, start);
+      tGain.gain.linearRampToValueAtTime(volume * 0.6, start + 0.02);
+      tGain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+
+      osc.connect(tGain);
+      tGain.connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + dur + 0.05);
+    });
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Interval selection
+  // ─────────────────────────────────────────────────────────────────────────
   presets.forEach(btn => {
     btn.addEventListener('click', () => {
       if (running) return;
@@ -393,50 +641,17 @@
     }
   });
 
-  // ── Volume ─────────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
+  // Volume
+  // ─────────────────────────────────────────────────────────────────────────
   volumeSlider.addEventListener('input', () => {
     volume = volumeSlider.value / 100;
     volumeVal.textContent = volumeSlider.value + '%';
   });
 
-  // ── Web Audio beep ─────────────────────────────────────────────────────────
-  function getAudioCtx() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    return audioCtx;
-  }
-
-  function playBeep() {
-    const ctx = getAudioCtx();
-    if (ctx.state === 'suspended') ctx.resume();
-
-    const now = ctx.currentTime;
-    const gain = ctx.createGain();
-    gain.connect(ctx.destination);
-
-    // Double-tone chime: 880 Hz then 1100 Hz
-    const tones = [
-      { freq: 880,  start: now,       dur: 0.18 },
-      { freq: 1100, start: now + 0.2, dur: 0.18 },
-    ];
-
-    tones.forEach(({ freq, start, dur }) => {
-      const osc = ctx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-
-      const tGain = ctx.createGain();
-      tGain.gain.setValueAtTime(0, start);
-      tGain.gain.linearRampToValueAtTime(volume * 0.6, start + 0.02);
-      tGain.gain.exponentialRampToValueAtTime(0.001, start + dur);
-
-      osc.connect(tGain);
-      tGain.connect(ctx.destination);
-      osc.start(start);
-      osc.stop(start + dur + 0.05);
-    });
-  }
-
-  // ── Display helpers ────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
+  // Display helpers
+  // ─────────────────────────────────────────────────────────────────────────
   function formatTime(sec) {
     if (sec < 60) return '0:' + String(sec).padStart(2, '0');
     const m = Math.floor(sec / 60);
@@ -446,7 +661,7 @@
 
   function updateClock(remaining) {
     clockTime.textContent = formatTime(remaining);
-    const frac = remaining / intervalSeconds;
+    const frac   = remaining / intervalSeconds;
     const offset = CIRCUMFERENCE * (1 - frac);
     clockProgress.style.strokeDashoffset = offset;
   }
@@ -462,7 +677,6 @@
   }
 
   function triggerBeepVisuals() {
-    // Flash clock red briefly
     clockTime.style.color = '#f87171';
     clockProgress.style.stroke = '#f87171';
     setTimeout(() => {
@@ -470,17 +684,14 @@
       clockProgress.style.stroke = 'var(--accent)';
     }, 400);
 
-    // Pulse ring
     pulseRing.classList.remove('beeping');
-    void pulseRing.offsetWidth; // reflow
+    void pulseRing.offsetWidth;
     pulseRing.classList.add('beeping');
 
-    // Badge
     beepCount++;
     beepBadge.textContent = beepCount + (beepCount === 1 ? ' beep' : ' beeps');
     beepBadge.classList.add('visible');
 
-    // Status flash
     statusEl.textContent = '🔔 Beep #' + beepCount + ' — refocus!';
     statusEl.className = 'status beeping-text';
     setTimeout(() => {
@@ -491,7 +702,9 @@
     }, 1500);
   }
 
-  // ── Timer core ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
+  // Timer core
+  // ─────────────────────────────────────────────────────────────────────────
   function tick() {
     elapsed++;
     const remaining = intervalSeconds - (elapsed % intervalSeconds);
@@ -501,32 +714,37 @@
     if (elapsed % intervalSeconds === 0) {
       playBeep();
       triggerBeepVisuals();
+      fireNotification(beepCount + 1); // fires before beepCount increments in triggerBeepVisuals
     }
   }
 
-  function startTimer() {
+  async function startTimer() {
     if (running) return;
     const customVal = parseInt(customInput.value);
     if (!isNaN(customVal) && customVal >= 3) intervalSeconds = customVal;
     if (intervalSeconds < 3) { alert('Please set an interval of at least 3 seconds.'); return; }
 
-    running = true;
-    elapsed = 0;
+    running   = true;
+    elapsed   = 0;
     beepCount = 0;
     beepBadge.classList.remove('visible');
 
     btnStart.style.display = 'none';
-    btnStop.style.display = 'block';
-    customInput.disabled = true;
+    btnStop.style.display  = 'block';
+    customInput.disabled   = true;
     presets.forEach(b => b.disabled = true);
 
     updateClock(intervalSeconds);
     clockLabel.textContent = 'counting';
-    statusEl.textContent = 'Next beep in ' + formatTime(intervalSeconds) + '…';
-    statusEl.className = 'status active';
+    statusEl.textContent   = 'Next beep in ' + formatTime(intervalSeconds) + '…';
+    statusEl.className     = 'status active';
 
-    // Prime AudioContext on user gesture
-    getAudioCtx();
+    // ── Fire up all the "keep alive" machinery ──
+    const ctx = getAudioCtx();
+    if (ctx.state === 'suspended') await ctx.resume();
+    startSilentLoop(ctx);       // 1. silent loop → keeps AudioContext alive
+    await requestWakeLock();    // 2. wake lock → screen stays on
+    await requestNotificationPermission(); // 3. ask once for notifications
 
     tickTimer = setInterval(tick, 1000);
   }
@@ -536,30 +754,47 @@
     running = false;
     clearInterval(tickTimer);
     tickTimer = null;
-    elapsed = 0;
+    elapsed   = 0;
 
     btnStart.style.display = 'block';
-    btnStop.style.display = 'none';
-    customInput.disabled = false;
+    btnStop.style.display  = 'none';
+    customInput.disabled   = false;
     presets.forEach(b => b.disabled = false);
 
     clockLabel.textContent = 'stopped';
     clockProgress.style.stroke = 'var(--accent)';
-    clockTime.style.color = '';
+    clockTime.style.color  = '';
     updateClock(intervalSeconds);
+
+    // Release all "keep alive" resources
+    stopSilentLoop();
+    releaseWakeLock();
 
     const summary = beepCount > 0
       ? `Stopped after ${beepCount} beep${beepCount === 1 ? '' : 's'}`
       : 'Stopped';
     statusEl.textContent = summary;
-    statusEl.className = 'status';
+    statusEl.className   = 'status';
   }
 
   btnStart.addEventListener('click', startTimer);
   btnStop.addEventListener('click', stopTimer);
 
-  // ── Init ───────────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
+  // Init
+  // ─────────────────────────────────────────────────────────────────────────
   resetDisplay();
+
+  // Show notification pill initial state
+  if ('Notification' in window && Notification.permission === 'granted') {
+    pillNotif.textContent = '🔔 Notifications: on';
+    pillNotif.classList.add('on');
+  } else if ('Notification' in window && Notification.permission === 'denied') {
+    pillNotif.textContent = '🔔 Notifications: blocked';
+    pillNotif.classList.add('warn');
+  } else {
+    pillNotif.textContent = '🔔 Notifications: tap Start';
+  }
 </script>
 </body>
 </html>
